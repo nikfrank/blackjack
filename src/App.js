@@ -22,8 +22,24 @@ class App extends Component {
     handStatus: 'blackjack',
   }
 
-  dealNextCard = ()=> 0 // noop
-  
+  dealNextCard = ()=> this.setState(({ cards, handStatus })=> ({
+    cards: (handStatus === 'hitting') ?
+           cards.concat( newCard() ) :
+           [ newCard(), newCard() ]
+    
+  }), ({
+    hasAce = !!cards.find(({ rank })=> rank === 1),
+    total = cards.reduce((p, { rank })=> p + Math.min(10, rank), 0),
+    
+  })=> this.setState(({ cards })=> ({
+    handStatus: (total > 21) ? 'bust' :
+                (total >= 17) ? 'standing' :
+                (hasAce && (total === 11)) ? 'blackjack' :
+                (hasAce && (total >= 8) && (total < 11)) ? 'standing' :
+                'hitting'
+  }) )
+  )
+
   render() {
     const { cards, handStatus } = this.state;
     

@@ -12,6 +12,11 @@ const defHandStyle = {
   padding: 0,
 };
 
+const newCard = ()=> ({
+  rank: Math.floor( Math.random() * 13 + 1 ),
+  suit: Math.floor( Math.random() * 4 ),
+});
+
 class App extends Component {
   state = {
     cards: [

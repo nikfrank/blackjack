@@ -1,16 +1,7 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
-import { Hand } from 'react-deck-o-cards';
-
-const defHandStyle = {
-  maxHeight:'34vh',
-  minHeight:'34vh',
-  
-  maxWidth:'100vw',
-  padding: 0,
-};
+import BlackjackHand from './BlackjackHand';
 
 const newCard = ()=> ({
   rank: Math.floor( Math.random() * 13 + 1 ),
@@ -19,46 +10,47 @@ const newCard = ()=> ({
 
 class App extends Component {
   state = {
-    cards: [
-      { rank: 1, suit: 3 },
-      { rank: 13, suit: 3 },
-    ],
-
-    handStatus: 'blackjack',
+    table: [],
+    hands: {},
+    dealer: [{ rank:1, suit:1 }],
   }
 
-  dealNextCard = ()=> this.setState(({ cards, handStatus })=> ({
-    cards: (handStatus === 'hitting') ?
-           cards.concat( newCard() ) :
-           [ newCard(), newCard() ]
+  addPlayer = ()=> this.setState(({ table, hands, playerId=Math.random() })=> ({
+    table: table.concat(playerId), hands: {...hands, [playerId]: [newCard(), newCard()]}
+  }))
+
+  dealerCard = ()=> this.setState(({ dealer })=> ({ dealer: dealer.concat(newCard()) }))
     
-  }), ({
-    hasAce = !!this.state.cards.find(({ rank })=> rank === 1),
-    total = this.state.cards.reduce((p, { rank })=> p + Math.min(10, rank), 0),
-    
-  } = {})=> this.setState(({ cards })=> ({
-    handStatus: (total > 21) ? 'bust' :
-                (total >= 17) ? 'standing' :
-                (hasAce && (total === 11)) ? 'blackjack' :
-                (hasAce && (total >= 8) && (total < 11)) ? 'standing' :
-                'hitting'
-  }) )
-  )
+  deal = {
+    card: player=> this.setState(({ table, hands })=> ({
+      hands: {...hands, [player]: hands[player].concat( newCard() ) },
+    })),
+
+    split: player=> this.setState({}),
+
+    doubleDown: player=> this.setState(({ table, hands })=> ({
+      hands: {...hands, [player]: hands[player].concat([newCard(), { event: 'doubleDown' }]) },
+    })),
+  }
 
   render() {
-    const { cards, handStatus } = this.state;
-    
+    const { table, hands, dealer } = this.state;
+
     return (
       <div className='App'>
-        <header className='App-header'>
-          <img src={logo} className='App-logo' alt='logo' />
-          <h1 className='App-title'>Welcome to React</h1>
+        <header className='Dealer'>
+          <BlackjackHand cards={dealer} player='dealer' height='25vh'/>
         </header>
         
         <div className='Game'>
-          <h1>{handStatus}</h1>
-          <Hand cards={cards} style={defHandStyle}/>
-          <button onClick={this.dealNextCard}>Next Card/Hand</button>
+          <button onClick={this.addPlayer}>+</button>
+          <ul>
+            {table.map(pid=> (
+              <li key={pid}>
+                <BlackjackHand cards={hands[pid]} player={pid} deal={this.deal}/>
+              </li>
+            ) )}
+          </ul>
         </div>
       </div>
     );

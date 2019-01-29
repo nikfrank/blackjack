@@ -262,3 +262,56 @@ runDealer = ()=> {
     'hitting';
 }
 ```
+
+
+#### style hand and buttons inside sized box
+
+in order to style different angles onto the hands based on how many hands there are currently dealt, we can use this nifty pseudoselector trick 
+
+```css
+li:nth-last-of-type(3):nth-of-type(1) {
+  background-color:red;
+}
+
+```
+
+to only select an `<li/>` when it is one of 3 in the `<ul/>` currently
+
+unfortunately, it only works for one at a time, so we need to duplicate it a bunch
+
+```css
+li:nth-last-of-type(3):nth-of-type(1),
+li:nth-last-of-type(2):nth-of-type(2),
+li:nth-last-of-type(1):nth-of-type(3) {
+  background-color:red;
+}
+```
+
+(you can test in the browser now and see that the `<li/>`s get the `background-color` when you make three of them)
+
+generating these selectors is tedious (especially when you want to change the underlying selector from just `li`, which is a terrible selector and shouldn't pass a Pull Request.
+
+Let's look into SASS to see if there's a better way to generate them:
+
+https://www.google.com/search?q=sass+selector+generation
+
+`$ yarn add node-sass`
+
+```scss
+$maxChildren: 12;
+
+@mixin of-n-siblings {
+  @for $n from 1 through $maxChildren {
+    @for $j from 1 through $n {
+      &:nth-of-type(#{$j}):nth-last-of-type(#{$n - $j + 1}) {
+        width: (100% / $n);
+        background-color: rgb( 128 * ($n % 3),
+                               128 * (($n+1) % 3),
+                               128 * (($n+2) % 3));
+      }
+    }
+  }
+}
+
+li{ @include of-n-siblings; }
+```

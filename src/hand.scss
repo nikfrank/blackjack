@@ -1,0 +1,16 @@
+$maxChildren: 12;
+
+@mixin of-n-siblings {
+  @for $i from 1 through $maxChildren {
+    @for $j from 1 through $i {
+      &:nth-of-type(#{$j}):nth-last-of-type(#{$i - $j + 1}) {
+        width: (100% / $i);
+        background-color: rgb( 128 * ($i % 3),
+                               128 * (($i+1) % 3),
+                               128 * (($i+2) % 3));
+      }
+    }
+  }
+}
+
+li{ @include of-n-siblings; }

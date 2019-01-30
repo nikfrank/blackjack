@@ -1,13 +1,15 @@
 $maxChildren: 12;
 
+
 @mixin of-n-siblings {
-  @for $i from 1 through $maxChildren {
-    @for $j from 1 through $i {
-      &:nth-of-type(#{$j}):nth-last-of-type(#{$i - $j + 1}) {
-        width: (100% / $i);
-        background-color: rgb( 128 * ($i % 3),
-                               128 * (($i+1) % 3),
-                               128 * (($i+2) % 3));
+  @for $n from 1 through $maxChildren {
+    @for $j from 1 through $n {
+      &:nth-of-type(#{$j}):nth-last-of-type(#{$n - $j + 1}) {
+        width: (100% / $n);
+
+        svg {
+          transform: rotate( #{-$j*30deg + $n*15deg + 15deg} )
+        }
       }
     }
   }

@@ -46,6 +46,12 @@ Just a silly example of dealing blackjack using my react-deck-o-cards npm module
 
 load page dev loop
 
+`$ cd ~/code`
+`$ create-react-app blackjack`
+
+`$ cd blackjack`
+`$ npm start`
+
 
 #### render different hands
 
@@ -100,7 +106,7 @@ export const handStatus = cards => {
     total: hand.total + ((hand.hasAce && hand.total <= 11) ? 10 : 0) ,
     hasAce: hand.hasAce,
     status: ( hand.total > 21 ) ? 'bust' :
-            ( hand.total === 11 && hand.hasAce ) ? 'blackjack' :
+            ( hand.total === 11 && hand.hasAce && cards.length === 2) ? 'blackjack' :
             'live',
   };
 };
@@ -112,7 +118,7 @@ export const handStatus = cards => {
 
 ./src/util.test.js
 ```js
-import { handStatus } frrom '../src/util';
+import { handStatus } from '../src/util';
 
 it('should calculate bust blackjack or live hand status', ()=>{
   const blackjackCards = [ { rank: 1, suit: 0 }, { rank: 13, suit: 0 } ];
@@ -123,6 +129,8 @@ it('should calculate bust blackjack or live hand status', ()=>{
   // etc.
 });
 ```
+
+`handStatus` is a named import (using the curlies), because we exported using `export const handStatus = ...` a named export
 
 now to run the tests
 
@@ -165,6 +173,13 @@ dealCard = ()=>
 
 //...
 ```
+
+here we're using [setState's updater function](https://medium.com/@wisecobbler/using-a-function-in-setstate-instead-of-an-object-1f5cfd6e55d1) which acts quite a bit like Redux's reducers:
+
+- here, we receive the previous state as a param `(state)=>`, and return a state override object for setState to use
+- in Redux, we'd receive the previous state and an "action" (an object representing the state update we want) `(state, action)=>` and return the **entire** nextState to update to.
+
+in both cases we wnt our logic to be pure!
 
 
 also let's style the hand a bit to make testing it easier
@@ -232,6 +247,7 @@ stand = ()=> this.setState({ handStatus: 'standing' })
 state = {
   cards: [],
   handStatus: 'live',
+  handTotal: 0,
   dealerHand: [ newCard() ],
 }
 
@@ -263,7 +279,7 @@ export const dealerStatus = cards=>{
   return {
     total, 
     status: (total > 21) ? 'bust' :
-            (total === 21 && cardTotal === 11) ? 'blackjack' :
+            (total === 21 && cards.length === 2) ? 'blackjack' :
             (total >= 18) ? 'standing' :
             (cardTotal >= 17) ? 'standing' :
             'hitting',
@@ -273,6 +289,8 @@ export const dealerStatus = cards=>{
 
 ./src/util.test.js
 ```js
+import { handStatus, dealerStatus } from './util';
+
 //...
 
 it('should calculate the correct dealer action', ()=>{
